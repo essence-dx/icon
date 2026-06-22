@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DX Icon Search</title>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 0 0% 3.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 0 0% 3.9%;
+            --primary: 0 0% 9%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 0 0% 96.1%;
+            --secondary-foreground: 0 0% 9%;
+            --muted: 0 0% 96.1%;
+            --muted-foreground: 0 0% 45.1%;
+            --accent: 0 0% 96.1%;
+            --accent-foreground: 0 0% 9%;
+            --border: 0 0% 89.8%;
+            --input: 0 0% 89.8%;
+            --ring: 0 0% 3.9%;
+            --radius: 0.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-subtitle {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            min-height: 60vh;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .message-query {
+            align-items: flex-end;
+            position: sticky;
+            top: 0;
+            background: hsl(var(--background));
+            z-index: 10;
+            padding: 0.5rem 0;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            align-self: flex-end;
+        }
+
+        .message-results {
+            align-items: flex-start;
+        }
+
+        .results-card {
+            width: 100%;
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .results-header {
+            padding: 1rem;
+            border-bottom: 1px solid hsl(var(--border));
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 0.5rem;
+            padding: 1rem;
+            max-height: none;
+        }
+
+        .icon-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: hsl(var(--background));
+            border: 1px solid hsl(var(--border));
+            border-radius: calc(var(--radius) - 2px);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-card:hover {
+            background: hsl(var(--accent));
+            border-color: hsl(var(--ring));
+        }
+
+        .icon-card.selected {
+            background: hsl(var(--accent));
+            border-color: hsl(var(--primary));
+        }
+
+        .icon-svg {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-svg img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .icon-name {
+            font-size: 0.75rem;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .icon-pack {
+            font-size: 0.625rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .search-box {
+            position: sticky;
+            bottom: 0;
+            background: hsl(var(--background));
+            padding: 1rem 0;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        .search-form {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.625rem 1rem;
+            background: hsl(var(--background));
+            border: 1px solid hsl(var(--input));
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            color: hsl(var(--foreground));
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: hsl(var(--ring));
+        }
+
+        .search-input::placeholder {
+            color: hsl(var(--muted-foreground));
+        }
+
+        .btn {
+            padding: 0.625rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+            border: 1px solid hsl(var(--border));
+        }
+
+        .btn-secondary:hover {
+            background: hsl(var(--accent));
+        }
+
+        .bucket {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 320px;
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            display: none;
+        }
+
+        .bucket.active {
+            display: block;
+        }
+
+        .bucket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .bucket-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .bucket-count {
+            padding: 0.25rem 0.5rem;
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border-radius: calc(var(--radius) - 2px);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .bucket-items {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .bucket-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            margin-bottom: 0.25rem;
+            background: hsl(var(--secondary));
+            border-radius: calc(var(--radius) - 2px);
+            font-size: 0.75rem;
+        }
+
+        .bucket-item-remove {
+            margin-left: auto;
+            cursor: pointer;
+            color: hsl(var(--muted-foreground));
+            font-weight: bold;
+        }
+
+        .bucket-item-remove:hover {
+            color: hsl(var(--foreground));
+        }
+
+        .bucket-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: hsl(var(--foreground));
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid hsl(var(--border));
+            border-top-color: hsl(var(--primary));
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-title">DX Icon Search</div>
+            <div class="header-subtitle">305,612+ icons across 229 packs</div>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <h3>Start searching</h3>
+                <p>Try "home", "arrow", "search", or any icon name</p>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <form class="search-form" id="searchForm">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput" 
+                    placeholder="Search icons..."
+                    autocomplete="off"
+                >
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="bucket" id="bucket">
+        <div class="bucket-header">
+            <span class="bucket-title">Selected Icons</span>
+            <span class="bucket-count" id="bucketCount">0</span>
+        </div>
+        <div class="bucket-items" id="bucketItems"></div>
+        <div class="bucket-actions">
+            <button class="btn btn-primary" id="copyBtn">Copy Command</button>
+            <button class="btn btn-secondary" id="clearBtn">Clear</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const bucket = document.getElementById('bucket');
+        const bucketCount = document.getElementById('bucketCount');
+        const bucketItems = document.getElementById('bucketItems');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const toast = document.getElementById('toast');
+
+        let selectedIcons = [];
+
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            // Clear previous results
+            chatContainer.innerHTML = '';
+            
+            addQueryMessage(query);
+            addLoadingMessage();
+
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=1000`);
+                const data = await response.json();
+                removeLoadingMessage();
+                addResultsMessage(data);
+            } catch (error) {
+                removeLoadingMessage();
+                console.error('Search failed:', error);
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            selectedIcons = [];
+            updateBucket();
+        });
+
+        copyBtn.addEventListener('click', () => {
+            if (selectedIcons.length === 0) return;
+
+            const iconSpecs = selectedIcons.map(icon => `${icon.name}:${icon.pack}`).join(' ');
+            const command = `icon download ${iconSpecs}`;
+
+            navigator.clipboard.writeText(command).then(() => {
+                showToast('Command copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                showToast('Failed to copy command');
+            });
+        });
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function addQueryMessage(query) {
+            const message = document.createElement('div');
+            message.className = 'message message-query';
+            message.innerHTML = `<div class="message-bubble">${escapeHtml(query)}</div>`;
+            chatContainer.appendChild(message);
+            // Don't scroll, keep at top
+        }
+
+        function addLoadingMessage() {
+            const message = document.createElement('div');
+            message.className = 'message message-results loading-message';
+            message.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Searching...</div>
+                </div>
+            `;
+            chatContainer.appendChild(message);
+            // Don't scroll, keep at top
+        }
+
+        function removeLoadingMessage() {
+            const loading = chatContainer.querySelector('.loading-message');
+            if (loading) loading.remove();
+        }
+
+        function addResultsMessage(data) {
+            const message = document.createElement('div');
+            message.className = 'message message-results';
+            
+            if (data.results.length === 0) {
+                message.innerHTML = `
+                    <div class="results-card">
+                        <div class="results-header">No results found for "${escapeHtml(data.query)}"</div>
+                    </div>
+                `;
+            } else {
+                const iconsHtml = data.results.map(icon => `
+                    <div class="icon-card ${isSelected(icon) ? 'selected' : ''}" 
+                         data-name="${escapeHtml(icon.name)}" 
+                         data-pack="${escapeHtml(icon.pack)}"
+                         onclick="toggleIcon('${escapeHtml(icon.name)}', '${escapeHtml(icon.pack)}')">
+                        <div class="icon-svg">
+                            <img src="/api/svg/${escapeHtml(icon.pack)}/${escapeHtml(icon.name)}" alt="${escapeHtml(icon.name)}">
+                        </div>
+                        <div class="icon-name">${escapeHtml(icon.name)}</div>
+                        <div class="icon-pack">${escapeHtml(icon.pack)}</div>
+                    </div>
+                `).join('');
+
+                message.innerHTML = `
+                    <div class="results-card">
+                        <div class="results-header">Found ${data.count} icons</div>
+                        <div class="icon-grid">${iconsHtml}</div>
+                    </div>
+                `;
+            }
+
+            chatContainer.appendChild(message);
+            // Scroll to top instead of bottom
+            chatContainer.scrollTop = 0;
+        }
+
+        function toggleIcon(name, pack) {
+            const index = selectedIcons.findIndex(i => i.name === name && i.pack === pack);
+            
+            if (index > -1) {
+                selectedIcons.splice(index, 1);
+            } else {
+                selectedIcons.push({ name, pack });
+            }
+
+            updateBucket();
+            updateIconCards();
+        }
+
+        function isSelected(icon) {
+            return selectedIcons.some(i => i.name === icon.name && i.pack === icon.pack);
+        }
+
+        function updateIconCards() {
+            document.querySelectorAll('.icon-card').forEach(card => {
+                const name = card.dataset.name;
+                const pack = card.dataset.pack;
+                card.classList.toggle('selected', isSelected({ name, pack }));
+            });
+        }
+
+        function updateBucket() {
+            bucketCount.textContent = selectedIcons.length;
+            bucket.classList.toggle('active', selectedIcons.length > 0);
+            
+            bucketItems.innerHTML = selectedIcons.map((icon, index) => `
+                <div class="bucket-item">
+                    <span>${escapeHtml(icon.name)}</span>
+                    <span style="color: hsl(var(--muted-foreground));">${escapeHtml(icon.pack)}</span>
+                    <span class="bucket-item-remove" onclick="removeFromBucket(${index})">×</span>
+                </div>
+            `).join('');
+        }
+
+        function removeFromBucket(index) {
+            selectedIcons.splice(index, 1);
+            updateBucket();
+            updateIconCards();
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        window.toggleIcon = toggleIcon;
+        window.removeFromBucket = removeFromBucket;
+    </script>
+</body>
+</html>

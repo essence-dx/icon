@@ -1,0 +1,71 @@
+name: Release CI
+on:
+  push:
+    branches:
+      - master
+      - alpha
+      - beta
+      - rc
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Setup npm 7
+        run: npm i -g npm@7 --registry=https://registry.npmjs.org
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.11'
+
+      - name: Install deps
+        run: bun i
+
+      - name: CI
+        run: bun run ci
+
+      - name: Test
+        run: bun run test
+
+      - name: Build
+        run: bun run build
+
+      - name: Release
+        run: bun run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Build Static
+        run: |-
+          bun run build:static
+          bun run sync:md
+
+      - name: Commit changes
+        run: |-
+          git diff
+          git config --global user.name "lobehubbot"
+          git config --global user.email "i@lobehub.com"
+          git add .
+          git commit -m "✨ feat(auto): Auto build static icons" || exit 0
+          git push
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Build RN
+        run: bun run build:rn
+
+      - name: Release Static
+        run: bun run release:static
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,108 @@
+[package]
+name = "dx-icon"
+version = "0.1.0"
+edition = "2024"
+authors = ["DX Team"]
+description = "World's fastest icon search engine with FST, rkyv, and semantic search"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["rayon"]
+wasm = ["wasm-bindgen", "serde-wasm-bindgen", "js-sys", "web-sys"]
+web = ["axum", "tokio", "tower", "tower-http", "tracing", "tracing-subscriber"]
+
+[[bin]]
+name = "search_cli"
+path = "src/bin/search_cli.rs"
+
+[[bin]]
+name = "build_index"
+path = "src/bin/build_index.rs"
+
+[[bin]]
+name = "icon"
+path = "src/bin/icon.rs"
+
+[[bin]]
+name = "generate_svgl"
+path = "src/bin/generate_svgl.rs"
+
+[[bin]]
+name = "compression_benchmark"
+path = "src/bin/compression_benchmark.rs"
+
+[[bin]]
+name = "memmap_benchmark"
+path = "src/bin/memmap_benchmark.rs"
+
+[[bin]]
+name = "web"
+path = "src/bin/web.rs"
+required-features = ["web"]
+
+[dependencies]
+# Zero-copy serialization
+rkyv = "0.8"
+bytemuck = { version = "1.19", features = ["derive"] }
+
+# Compact data structures
+fst = "0.4"
+
+# Fast JSON parsing (SIMD-accelerated)
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+
+# Compression (zstd: 38.5% smaller, ~35-40ms load time)
+zstd = "0.13"
+memmap2 = "0.9"
+
+# Error handling
+anyhow = "1.0"
+
+# CLI argument parsing
+clap = { version = "4.5", features = ["derive"] }
+
+# HTTP client for logo.dev API
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+
+# Parallel processing
+rayon = { version = "1.10", optional = true }
+
+# WASM support
+wasm-bindgen = { version = "0.2", optional = true }
+serde-wasm-bindgen = { version = "0.6", optional = true }
+js-sys = { version = "0.3", optional = true }
+web-sys = { version = "0.3", features = ["console"], optional = true }
+getrandom = { version = "0.3", features = ["wasm_js"] }
+
+# Fuzzy matching (SIMD-accelerated Levenshtein)
+triple_accel = "0.4"
+nucleo-matcher = "0.3"
+
+# PERFORMANCE OPTIMIZATIONS (Phase 1)
+ahash = "0.8"           # 2x faster HashMap
+memchr = "2.7"          # SIMD string search
+smallvec = "1.13"       # Stack-allocated vectors
+
+# ADVANCED OPTIMIZATIONS (Phase 2)
+dashmap = "6.1"         # Lock-free concurrent HashMap
+bumpalo = "3.16"        # Arena allocator (5x faster)
+
+# ULTRA-PERFORMANCE (Phase 3 - 2026)
+branches = "0.3"        # Branch prediction hints
+aho-corasick = "1.1"    # Multi-pattern matching O(N+M)
+daachorse = "1.0"       # Fastest double-array AC automaton
+
+# Web server dependencies (optional, behind "web" feature)
+axum = { version = "0.8.8", optional = true }
+tokio = { version = "1.51.0", features = ["full"], optional = true }
+tower = { version = "0.5.3", optional = true }
+tower-http = { version = "0.6.8", features = ["fs", "trace", "cors"], optional = true }
+tracing = { version = "0.1.44", optional = true }
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"], optional = true }
+
+[dev-dependencies]
+criterion = "0.5"
