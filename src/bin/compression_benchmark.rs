@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 fn main() -> anyhow::Result<()> {
+    let _config = dx_icon::dx_config::IconDxConfig::load()?;
     println!("=== Compression Benchmark: LZ4 vs zstd ===\n");
 
     let index_dir = PathBuf::from("index");

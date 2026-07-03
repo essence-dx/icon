@@ -138,11 +138,26 @@ enum Commands {
 }
 
 fn main() {
+    let config = match dx_icon::dx_config::IconDxConfig::load() {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("[ERROR] Config: {}", e);
+            std::process::exit(1);
+        }
+    };
+
     let cli = Cli::parse();
 
     if let Err(e) = run(cli) {
         eprintln!("[ERROR] {}", e);
         std::process::exit(1);
+    }
+
+    if let Err(e) = config.write_sr("icon", &[("tool", "icon"), ("action", "run"), ("status", "ok")]) {
+        eprintln!("[WARN] Failed to write .sr: {}", e);
+    }
+    if let Some(status) = config.read_status("icon") {
+        eprintln!("[icon] sr cache verified: {} entries", status.len());
     }
 }
 

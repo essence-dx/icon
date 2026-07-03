@@ -46,6 +46,11 @@ struct SearchResponse {
 
 #[tokio::main]
 async fn main() {
+    if let Err(e) = dx_icon::dx_config::IconDxConfig::load() {
+        eprintln!("[ERROR] Config: {}", e);
+        std::process::exit(1);
+    }
+
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()

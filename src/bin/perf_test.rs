@@ -3,6 +3,7 @@ use dx_icon::index::IconIndex;
 use std::path::PathBuf;
 
 fn main() -> anyhow::Result<()> {
+    let _config = dx_icon::dx_config::IconDxConfig::load()?;
     let index_dir = PathBuf::from("index");
     let index = IconIndex::load_mmap(&index_dir)?;
     let engine = IconSearchEngine::from_index(index)?;

@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 fn main() -> anyhow::Result<()> {
+    let _config = dx_icon::dx_config::IconDxConfig::load()?;
     let index_dir = PathBuf::from("index");
 
     println!("=== Memory-Mapped vs Standard Load Benchmark ===\n");

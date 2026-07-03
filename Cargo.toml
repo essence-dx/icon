@@ -59,6 +59,9 @@ serde = { version = "1.0", features = ["derive"] }
 zstd = "0.13"
 memmap2 = "0.9"
 
+# Config file parsing
+toml = "0.8"
+
 # Error handling
 anyhow = "1.0"
 
@@ -77,6 +80,9 @@ serde-wasm-bindgen = { version = "0.6", optional = true }
 js-sys = { version = "0.3", optional = true }
 web-sys = { version = "0.3", features = ["console"], optional = true }
 getrandom = { version = "0.3", features = ["wasm_js"] }
+
+# DX Serializer (.sr / .machine format)
+serializer = { path = "../serializer", package = "dx-serializer", version = "0.1.0" }
 
 # Fuzzy matching (SIMD-accelerated Levenshtein)
 triple_accel = "0.4"

@@ -16,6 +16,7 @@ struct Args {
 }
 
 fn main() -> anyhow::Result<()> {
+    let _config = dx_icon::dx_config::IconDxConfig::load()?;
     let args = Args::parse();
     let icon_root = discover_icon_root();
     let data_dir = args

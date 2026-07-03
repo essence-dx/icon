@@ -7,6 +7,7 @@
 //! - Multi-threaded WASM support
 //! - LZ4 compression for network transfer
 
+pub mod dx_config;
 pub mod avx_search;
 pub mod bloom;
 pub mod builder;

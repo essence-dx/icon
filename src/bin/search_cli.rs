@@ -4,6 +4,8 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 
 fn main() -> anyhow::Result<()> {
+    let _config = dx_icon::dx_config::IconDxConfig::load()?;
+
     // Try multiple possible index locations
     let possible_paths = [
         PathBuf::from("index"),

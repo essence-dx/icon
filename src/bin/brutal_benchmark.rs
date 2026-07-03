@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 fn main() -> anyhow::Result<()> {
+    let _config = dx_icon::dx_config::IconDxConfig::load()?;
     println!("=== BRUTAL TRUTH BENCHMARK ===\n");
     println!("Testing against world-class standards (2026)\n");
 

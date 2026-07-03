@@ -120,6 +120,8 @@ fn extract_inner_content(svg: &str) -> Result<String, String> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dx_icon::dx_config::IconDxConfig::load()?;
+
     // Try multiple possible paths (run from workspace root or icon crate)
     let svgl_dir = if Path::new("apps/www/public/svgl").exists() {
         Path::new("apps/www/public/svgl")
