@@ -49,6 +49,28 @@ impl IconDxConfig {
         Ok(())
     }
 
+    pub fn global_sr_dir(&self) -> PathBuf {
+        dirs::cache_dir()
+            .map(|b| b.join("dx").join("icon"))
+            .unwrap_or_else(|| PathBuf::from("~/.cache/dx/icon"))
+    }
+
+    pub fn write_global_sr(&self, name: &str, entries: &[(&str, &str)]) -> std::io::Result<()> {
+        let dir = self.global_sr_dir();
+        std::fs::create_dir_all(&dir)?;
+        let path = dir.join(format!("{name}.sr"));
+        let mut buf: Vec<u8> = Vec::new();
+        for (key, value) in entries {
+            write!(buf, "{key}=")?;
+            Self::write_llm_value(&mut buf, value)?;
+            buf.push(b'\n');
+        }
+        let tmp = path.with_extension("sr.tmp");
+        std::fs::write(&tmp, &buf)?;
+        std::fs::rename(&tmp, path)?;
+        Ok(())
+    }
+
     pub fn read_status(&self, name: &str) -> Option<HashMap<String, String>> {
         let sr_path = self.sr_path(name);
         let (doc, _from_machine) = serializer::try_read_machine_or_sr(&sr_path)?;

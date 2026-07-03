@@ -156,6 +156,9 @@ fn main() {
     if let Err(e) = config.write_sr("icon", &[("tool", "icon"), ("action", "run"), ("status", "ok")]) {
         eprintln!("[WARN] Failed to write .sr: {}", e);
     }
+    if let Err(e) = config.write_global_sr("icon", &[("tool", "icon"), ("action", "run"), ("status", "ok")]) {
+        eprintln!("[WARN] Failed to write global .sr: {}", e);
+    }
     if let Some(status) = config.read_status("icon") {
         eprintln!("[icon] sr cache verified: {} entries", status.len());
     }
