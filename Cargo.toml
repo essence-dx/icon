@@ -82,7 +82,7 @@ web-sys = { version = "0.3", features = ["console"], optional = true }
 getrandom = { version = "0.3", features = ["wasm_js"] }
 
 # DX Serializer (.sr / .machine format)
-serializer = { path = "../serializer", package = "dx-serializer", version = "0.1.0" }
+serializer = { path = "../serializer", package = "dx-serializer", version = "1.0.0" }
 
 dirs = "6.0"
 
