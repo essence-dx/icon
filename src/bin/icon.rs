@@ -64,7 +64,7 @@ fn icon_crate_marker(path: &Path) -> bool {
 /// DX Icon CLI - Professional icon search and management tool
 #[derive(Parser)]
 #[command(name = "icon")]
-#[command(version = "0.1.0")]
+#[command(version = "1.0.0")]
 #[command(about = "Search and export icons from 305,612+ icons across 229 packs", long_about = None)]
 struct Cli {
     #[command(subcommand)]
